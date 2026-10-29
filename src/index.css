@@ -1,12 +1,26 @@
 @import "tailwindcss";
+@import "pretendard/dist/web/static/pretendard-dynamic-subset.css";
+@import "@fontsource/inter/600.css";
 
-/* 임시 와이어프레임 토큰 — Figma 변수가 정리되면 여기에 1:1로 옮긴다 */
+/* Figma(UX 파일 132:* 화면)에서 옮긴 값. Figma 변수가 정리되면 이름만 맞추면 된다. */
 @theme {
-  --color-line: #2f6f1e;
-  --color-paper: #ddd6c8;
-  --color-ink: #1a1a1a;
-  --color-muted: #8a8a8a;
-  --color-box: #f2f2f2;
+  --color-line: #469015;
+  --color-paper: #ddd7c8;
+  --color-grid: #d0cabb;
+  --color-grid-intro: #beb8aa;
+  --color-ink: #000000;
+  --color-ink-soft: #1d1d1d;
+  --color-muted: #7a766c;
+  --color-slot: #aea99d;
+  --color-chip-border: #f3f3f3;
+
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-inter: Inter, var(--font-sans);
+
+  --shadow-sign: 2px 4px 5px 0 rgba(57, 74, 46, 0.4);
+  --shadow-band: 0 3px 5px 0 rgba(57, 74, 46, 0.4);
+  --shadow-chip: 1px 1px 3px 0 rgba(0, 0, 0, 0.1);
+  --shadow-sticker: 0 5.474px 6.843px 0 rgba(0, 0, 0, 0.2);
 }
 
 html,
@@ -19,7 +33,7 @@ body {
   margin: 0;
   background: var(--color-paper);
   color: var(--color-ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+  font-family: var(--font-sans);
   overscroll-behavior: none;
   -webkit-user-select: none;
   user-select: none;
