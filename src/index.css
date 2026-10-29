@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+/* 임시 와이어프레임 토큰 — Figma 변수가 정리되면 여기에 1:1로 옮긴다 */
+@theme {
+  --color-line: #2f6f1e;
+  --color-paper: #ddd6c8;
+  --color-ink: #1a1a1a;
+  --color-muted: #8a8a8a;
+  --color-box: #f2f2f2;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  touch-action: manipulation;
+}
