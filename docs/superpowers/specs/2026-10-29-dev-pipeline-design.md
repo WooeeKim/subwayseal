@@ -96,3 +96,45 @@ Figma 변수가 정리되면 Tailwind 테마(`@theme`의 색·간격·폰트)에
 - 색상휠 구현 방식 (canvas vs CSS conic-gradient)
 - iPhone Safari 대응 세부: `touch-action: none`, 더블탭 확대 방지, `devicePixelRatio` 선명도, 노치·홈바 여백(`viewport-fit=cover`)
 - 패키지 버전 (작성 시점 안정 버전)
+
+## 변경 사항 (2026-10-30) — 팀 확인 필요
+
+위 MVP 범위를 넘어 아래가 먼저 들어갔다. 위 본문은 처음 합의한 기록이라 그대로 두고, 바뀐 점만 적는다.
+팀이 동의하지 않는 항목은 되돌리거나 다시 정한다.
+
+### 범위
+
+| 처음 정한 것 | 지금 코드 |
+|---|---|
+| MVP는 그리기만. 저장·씰·스티커북은 다음 단계 | 저장, 스티커북, 지하철 꾸미기까지 들어감 |
+| 비목표: 서버, 로그인, 저장 | **Supabase**(DB + 이미지 저장소)로 저장. 로그인은 여전히 없음 |
+| 비목표: 데스크톱 브라우저 대응 | PC에서는 폰 비율(402×874) 틀로 가운데 보여 줌. 확인용이며 대상은 여전히 iPhone Safari |
+| 디자인 없음, 흰/회색 박스 | Figma UX 파일의 132:* 프레임을 그대로 옮김 |
+
+### 기능
+
+| 처음 정한 것 | 지금 코드 | 이유 |
+|---|---|---|
+| 색상휠 + 임시 밝기 슬라이더 | 색 10개 팔레트 (색 버튼을 누르면 뜸) | Figma 툴바에 색상휠이 없고 색 버튼 하나만 있음 |
+| 펜 한 종류 + 두께 조절 | 연필·지우개 + 두께 5단계 | Figma 툴바 그대로 |
+| undo / redo (버튼) | 두 손가락 탭 = 실행 취소, 세 손가락 탭 = 다시 실행 | Figma에 버튼 자리가 없음 |
+| 그림 영역 정사각형 | Figma 카드 비율(361×451) 안의 점선 영역 | Figma 디자인 그대로 |
+| 새로고침하면 사라져도 됨 | DB에 저장. 키가 없으면 메모리에만 저장하고 "DB 미연결" 표시 | — |
+
+라벨 6개는 스티커북 6권으로 정했다. Figma에서 스티커북 라벨 색과 지하철 꾸미기 기본 선택 라벨(4번)이 같아서다.
+
+### 컴포넌트 분담
+
+처음 정한 4개(`DrawingCanvas`, `ColorWheel`, `BrushSize`, `Toolbar`) 대신 지금은 이렇게 나뉜다.
+나눠 맡을 때 이 단위를 쓴다.
+
+- `src/screens/` — 화면 4개: `Splash`, `CanvasScreen`, `StickerBookScreen`, `SubwayDecoScreen`
+- `src/components/` — `DrawingCanvas`, `Toolbar`(도구·두께·색 포함), `StickerFrame`·`StickerCard`(씰 카드), `TopTabs`, `GridBackground`
+- `src/lib/` — 공유 파일: `stickers.ts`(DB 읽기·쓰기), `labels.ts`, `supabase.ts`. **바꿀 때 팀 채팅에 먼저 알린다** (`App.tsx`, `package.json`과 같음)
+- `supabase/` — DB 구조. 바꿀 때는 `migrations/`에 새 번호 파일을 추가하고 DB 관리자가 실행한다
+
+### 남은 것
+
+- 라벨(책) 이름·의미는 아직 없음. 색으로만 구분
+- 지하철 사진 `subway.png`가 2.6MB라 첫 로딩이 느림
+- 누구나 읽고 쓸 수 있는 DB 권한(anon). 팀 밖으로 공개하기 전에 다시 정해야 함

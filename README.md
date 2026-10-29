@@ -26,10 +26,18 @@ KAIST ID304 UX Design (2026 Fall) 팀 프로젝트.
 
 ## 상태
 
-컨셉 설계 단계. 웹앱 프로토타입 개발 예정. 첫 목표는 아이폰에서 손가락으로 그리는 캔버스.
+와이어프레임 프로토타입. 화면 4개가 Figma UX 디자인(132:* 프레임)대로 들어가 있고, 그린 스티커는 팀 공용 DB에 저장됩니다.
 
-- 기술: Vite + React + TypeScript + Tailwind CSS
-- 대상: iPhone Safari만
+| 화면 | 할 수 있는 것 |
+|---|---|
+| 스플래시 | 역 이름판 탭하면 시작 |
+| 캔버스 | 손가락으로 그리기(연필·지우개·두께 5단계·색 10개), 장소·이름 입력, 뒤집어서 메모, ✓로 저장. 두 손가락 탭 = 실행 취소, 세 손가락 탭 = 다시 실행 |
+| 스티커북 | 라벨 6개 = 책 6권. 아래 스티커를 고르고 빈 칸을 탭해 붙이기, 오른쪽 숫자로 쪽 이동 |
+| 지하철 꾸미기 | 가로 화면. 라벨로 책을 고르면 그 책의 스티커만 보이고, 고른 뒤 지하철 칸을 탭해 붙이기 |
+
+- 기술: Vite + React + TypeScript + Tailwind CSS, 저장은 Supabase (DB + 이미지 저장소)
+- 대상: iPhone Safari. PC 브라우저에서는 폰 비율(402×874) 틀로 보여 줍니다 (확인용)
+- 로그인 없음. 팀 내부 테스트용이라 키를 가진 사람은 누구나 모든 스티커를 읽고 쓸 수 있습니다
 - 개발 흐름 설계: [docs/superpowers/specs/2026-10-29-dev-pipeline-design.md](docs/superpowers/specs/2026-10-29-dev-pipeline-design.md)
 
 ---
@@ -114,7 +122,30 @@ npm install
 
 `node_modules` 폴더가 생기면 성공. `package.json`이 바뀌었을 때(누가 새 패키지를 추가했을 때)도 다시 실행하세요.
 
-### 7. 아이폰에서 열기
+### 7. DB 키 넣기 (Supabase)
+
+그린 스티커는 팀 공용 Supabase DB에 저장됩니다. 키가 없어도 앱은 열리지만, 화면 위에 "DB 미연결" 문구가 뜨고 새로고침하면 그림이 사라집니다.
+
+1. 팀 채팅에서 **anon(publishable) 키**를 받으세요. 키는 레포에 올리지 않습니다.
+2. 예시 파일을 복사해 `.env.local`을 만듭니다.
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+3. `.env.local`을 열어 `VITE_SUPABASE_ANON_KEY=` 뒤에 받은 키를 붙여넣고 저장합니다.
+
+   ```bash
+   open -e .env.local
+   ```
+
+- `.env.local`은 git이 무시하는 파일이라 커밋되지 않습니다. **`.env.example`에는 키를 넣지 마세요** (이 파일은 커밋됩니다).
+- `service_role`/`secret` 키는 절대 쓰지 마세요. 앱에는 anon 키만 씁니다.
+- 키를 넣은 뒤에는 개발 서버를 껐다 켜야 적용됩니다.
+
+**DB 관리자만 (한 번):** 테이블·저장소는 Supabase 대시보드 → SQL Editor에서 만듭니다. 처음엔 [supabase/schema.sql](supabase/schema.sql)을, 그다음 [supabase/migrations/](supabase/migrations/) 안의 파일을 번호 순서대로 실행합니다. 새 마이그레이션 파일이 올라오면 그 파일만 실행하고 팀 채팅에 알려주세요. (현재 팀 DB에는 `002_book_label.sql`까지 적용됨)
+
+### 8. 아이폰에서 열기
 
 ```bash
 npm run dev -- --host
