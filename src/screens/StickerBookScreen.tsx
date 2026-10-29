@@ -6,7 +6,7 @@ import { updateSticker, type Sticker } from '../lib/stickers'
 const SLOTS_PER_PAGE = 9
 // 인덱스 어안 효과: 현재 페이지가 가장 크고 멀어질수록 작아진다 (Figma 132:892)
 const INDEX_SIZES = [19.483, 21.919, 24.354, 36.531, 24.354, 21.919, 19.483]
-const GRID_WIDTH = 'min(361px, 100vw - 41px)'
+const GRID_WIDTH = 'min(361px, var(--app-w) - 41px)'
 // 그리드 맨 아래가 스티커 더미에 가리지 않게 남기는 여백
 const TRAY_SPACE = 220
 

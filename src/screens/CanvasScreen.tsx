@@ -7,7 +7,7 @@ import Toolbar, { COLORS, SIZES } from '../components/Toolbar'
 import { createSticker } from '../lib/stickers'
 
 // 카드 폭: Figma 361px. 화면이 낮으면 툴바(115px)와 겹치지 않게 높이 기준으로 줄인다 (카드 비율 361:451).
-const CARD_WIDTH = 'min(361px, 100vw - 41px, (100dvh - env(safe-area-inset-top) - 153px - 123px) * 0.8)'
+const CARD_WIDTH = 'min(361px, var(--app-w) - 41px, (var(--app-h) - env(safe-area-inset-top) - 153px - 123px) * 0.8)'
 
 // Figma: 01 캔버스(132:376) · 02 뒷면 상세설명(132:465, 132:551)
 export default function CanvasScreen({ onSaved }: { onSaved: () => void }) {

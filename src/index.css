@@ -23,10 +23,46 @@
   --shadow-sticker: 0 5.474px 6.843px 0 rgba(0, 0, 0, 0.2);
 }
 
+/* 앱 화면 크기. 폰에서는 화면 전체, 넓은 화면(PC·태블릿)에서는 Figma 프레임(402×874) 비율로 가운데 고정한다.
+   화면 크기가 필요한 곳은 100vw/100dvh 대신 이 값을 쓴다. */
+:root {
+  --app-w: 100vw;
+  --app-h: 100dvh;
+}
+
+@media (min-width: 600px) {
+  :root {
+    --app-w: min(402px, 100dvh * 402 / 874);
+    --app-h: min(874px, 100dvh);
+  }
+}
+
 html,
-body,
-#root {
+body {
   height: 100%;
+}
+
+#root {
+  position: relative;
+  width: var(--app-w);
+  height: var(--app-h);
+  margin: 0 auto;
+  overflow: clip;
+  /* 안쪽 position: fixed 화면도 이 틀 안에 갇히게 한다 */
+  transform: translateZ(0);
+}
+
+@media (min-width: 600px) {
+  body {
+    display: grid;
+    place-items: center;
+    background: #c9c3b4;
+  }
+
+  #root {
+    background: var(--color-paper);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  }
 }
 
 body {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import backIcon from '../assets/figma/back.svg'
 import subwayImage from '../assets/figma/subway.png'
 import StickerCard from '../components/StickerCard'
@@ -11,14 +11,17 @@ const H = 402
 // 라벨 깃발 x 위치(프레임 기준): 6번이 482, 한 칸에 63씩 오른쪽으로 갈수록 번호가 작아진다
 const labelX = (id: number) => 482 + (6 - id) * 63
 
-function useViewport() {
-  const read = () => ({ w: window.innerWidth, h: window.innerHeight })
-  const [size, setSize] = useState(read)
+// 화면 대신 앱 틀(#root) 크기를 잰다. PC 에서는 틀이 폰 비율로 고정돼 있다.
+function useFrameSize(ref: React.RefObject<HTMLDivElement | null>) {
+  const [size, setSize] = useState({ w: 0, h: 0 })
   useEffect(() => {
-    const onResize = () => setSize(read())
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [])
+    const el = ref.current!
+    const read = () => setSize({ w: el.clientWidth, h: el.clientHeight })
+    read()
+    const observer = new ResizeObserver(read)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [ref])
   return size
 }
 
@@ -38,7 +41,8 @@ export default function SubwayDecoScreen({
   onChange: () => void
   onBack: () => void
 }) {
-  const { w: vw, h: vh } = useViewport()
+  const frame = useRef<HTMLDivElement>(null)
+  const { w: vw, h: vh } = useFrameSize(frame)
   const [selected, setSelected] = useState<string | null>(null)
 
   const portrait = vh > vw
@@ -58,7 +62,7 @@ export default function SubwayDecoScreen({
   }
 
   return (
-    <div className="fixed inset-0 overflow-clip bg-paper">
+    <div ref={frame} className="fixed inset-0 overflow-clip bg-paper">
       <div
         className="absolute top-0 left-0 origin-top-left overflow-clip"
         style={{ width: long, height: short, transform: portrait ? `translateX(${vw}px) rotate(90deg)` : undefined }}
