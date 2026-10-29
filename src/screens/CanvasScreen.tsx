@@ -1,11 +1,15 @@
 import { useRef, useState } from 'react'
+import checkIcon from '../assets/figma/check.svg'
+import plusIcon from '../assets/figma/plus.svg'
 import DrawingCanvas, { type DrawingCanvasHandle, type Tool } from '../components/DrawingCanvas'
+import StickerFrame, { formatDate } from '../components/StickerFrame'
+import Toolbar, { COLORS, SIZES } from '../components/Toolbar'
 import { createSticker } from '../lib/stickers'
 
-const COLORS = ['#1a1a1a', '#e5e5e5', '#c0392b', '#e67e22', '#f1c40f', '#2f6f1e', '#2e86de', '#8e44ad']
-const SIZES = [2, 4, 8, 14]
+// 카드 폭: Figma 361px. 화면이 낮으면 툴바(115px)와 겹치지 않게 높이 기준으로 줄인다 (카드 비율 361:451).
+const CARD_WIDTH = 'min(361px, 100vw - 41px, (100dvh - env(safe-area-inset-top) - 153px - 123px) * 0.8)'
 
-// 와이어프레임: Instant sticker canvas + Rough drawing + Flip & note
+// Figma: 01 캔버스(132:376) · 02 뒷면 상세설명(132:465, 132:551)
 export default function CanvasScreen({ onSaved }: { onSaved: () => void }) {
   const canvas = useRef<DrawingCanvasHandle>(null)
   const [tool, setTool] = useState<Tool>('pen')
@@ -14,7 +18,7 @@ export default function CanvasScreen({ onSaved }: { onSaved: () => void }) {
   const [place, setPlace] = useState('')
   const [name, setName] = useState('')
   const [memo, setMemo] = useState('')
-  const [flipped, setFlipped] = useState(false)
+  const [back, setBack] = useState(false)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -23,7 +27,8 @@ export default function CanvasScreen({ onSaved }: { onSaved: () => void }) {
     setPlace('')
     setName('')
     setMemo('')
-    setFlipped(false)
+    setBack(false)
+    setMessage('')
   }
 
   async function save() {
@@ -45,99 +50,66 @@ export default function CanvasScreen({ onSaved }: { onSaved: () => void }) {
     }
   }
 
-  const today = new Date().toISOString().slice(0, 10)
-
   return (
-    <div className="flex flex-1 flex-col px-4">
-      <div className="flex items-center justify-between pb-2 text-2xl">
-        <button onClick={reset} aria-label="새 스티커">+</button>
-        <button onClick={save} disabled={saving} aria-label="저장">
-          {saving ? '…' : '✓'}
-        </button>
+    <>
+      <button onClick={reset} aria-label="새 스티커" className="absolute top-[calc(env(safe-area-inset-top)+107px)] left-[21px] h-[21.156px] w-[21.738px]">
+        <span className="absolute inset-[-4.73%_-4.6%]">
+          <img src={plusIcon} alt="" className="block size-full max-w-none" />
+        </span>
+      </button>
+      <button
+        onClick={save}
+        disabled={saving}
+        aria-label="저장"
+        className="absolute top-[calc(env(safe-area-inset-top)+105px)] right-[19.83px] h-[23.465px] w-[28.172px] disabled:opacity-40"
+      >
+        <span className="absolute inset-[-4.26%_-3.55%_-4.27%_-3.55%]">
+          <img src={checkIcon} alt="" className="block size-full max-w-none" />
+        </span>
+      </button>
+
+      <div className="absolute top-[calc(env(safe-area-inset-top)+153px)] left-1/2 -translate-x-1/2" style={{ width: CARD_WIDTH }}>
+        <StickerFrame
+          date={formatDate(new Date().toISOString())}
+          onFlip={() => setBack((b) => !b)}
+          chip={
+            <div className={`flex items-center gap-[2.77cqw] overflow-hidden rounded-full border-[0.554cqw] border-chip-border bg-white pr-[4.155cqw] shadow-chip ${back ? 'invisible' : ''}`}>
+              <span className="rounded-full bg-line px-[2.45cqw] py-[1.75cqw]">
+                <input
+                  value={place}
+                  onChange={(e) => setPlace(e.target.value)}
+                  placeholder="Place"
+                  size={Math.max(place.length, 5)}
+                  className="m-0 bg-transparent p-0 text-[4.155cqw] leading-normal font-semibold text-white outline-none placeholder:text-white"
+                />
+              </span>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Drawing Name"
+                size={Math.max(name.length, 12)}
+                className="m-0 bg-transparent p-0 font-inter text-[4.155cqw] leading-normal font-semibold text-ink-soft outline-none placeholder:text-ink-soft"
+              />
+            </div>
+          }
+        >
+          <div className="absolute inset-0 overflow-hidden rounded-[0.831cqw] border-[1.5px] border-dashed border-paper">
+            <DrawingCanvas ref={canvas} tool={tool} color={color} size={size} />
+            {back && (
+              <textarea
+                autoFocus
+                value={memo}
+                onChange={(e) => setMemo(e.target.value)}
+                placeholder="Leaving memo.."
+                className="absolute inset-0 resize-none bg-white px-[4cqw] pt-[35.46cqw] text-center text-[5.54cqw] leading-normal font-medium text-ink-soft outline-none placeholder:text-muted"
+              />
+            )}
+          </div>
+        </StickerFrame>
+        {message && <p className="pt-2 text-center text-[12px] font-semibold text-muted">{message}</p>}
       </div>
 
-      {/* 스티커 카드: 앞면 = 그림, 뒷면 = 메모 */}
-      <div className="bg-white p-2 shadow">
-        <div className="flex items-center gap-2 pb-2 text-xs">
-          <input
-            value={place}
-            onChange={(e) => setPlace(e.target.value)}
-            placeholder="Place"
-            className="w-20 rounded-full bg-line px-2 py-1 text-white placeholder:text-white/70"
-          />
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Drawing Name"
-            className="min-w-0 flex-1 rounded-full border border-box px-2 py-1"
-          />
-          <button onClick={() => setFlipped((f) => !f)} aria-label="뒤집기" className="text-base">
-            ↻
-          </button>
-        </div>
-        <div className="relative border border-dashed border-muted/50">
-          <DrawingCanvas ref={canvas} tool={tool} color={color} size={size} />
-          {flipped && (
-            <textarea
-              autoFocus
-              value={memo}
-              onChange={(e) => setMemo(e.target.value)}
-              placeholder="Leaving memo…"
-              className="absolute inset-0 resize-none bg-white p-3 text-sm"
-            />
-          )}
-        </div>
-        <p className="pt-1 text-right text-[10px] text-muted">{today}</p>
-      </div>
-
-      {message && <p className="pt-2 text-center text-xs text-red-700">{message}</p>}
-
-      {/* 도구: 펜/지우개, 두께, 색, undo/redo */}
-      <div className="mt-auto flex flex-col gap-3 pb-[max(env(safe-area-inset-bottom),12px)] pt-4">
-        <div className="flex items-center justify-between">
-          <div className="flex gap-2 text-xs">
-            {(['pen', 'eraser'] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTool(t)}
-                className={`rounded border px-3 py-2 ${tool === t ? 'border-ink bg-white' : 'border-muted/40'}`}
-              >
-                {t === 'pen' ? '펜' : '지우개'}
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center gap-2">
-            {SIZES.map((s) => (
-              <button
-                key={s}
-                onClick={() => setSize(s)}
-                aria-label={`두께 ${s}`}
-                className={`flex h-8 w-8 items-center justify-center rounded-full ${size === s ? 'bg-white' : ''}`}
-              >
-                <span className="rounded-full bg-ink" style={{ width: s + 2, height: s + 2 }} />
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-2 text-lg">
-            <button onClick={() => canvas.current?.undo()} aria-label="실행 취소">↶</button>
-            <button onClick={() => canvas.current?.redo()} aria-label="다시 실행">↷</button>
-          </div>
-        </div>
-        <div className="flex justify-between">
-          {COLORS.map((c) => (
-            <button
-              key={c}
-              onClick={() => {
-                setColor(c)
-                setTool('pen')
-              }}
-              aria-label={`색 ${c}`}
-              className={`h-8 w-8 rounded-full border-2 ${color === c && tool === 'pen' ? 'border-ink' : 'border-white'}`}
-              style={{ background: c }}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
+      <Toolbar tool={tool} size={size} color={color} onTool={setTool} onSize={setSize} onColor={setColor} />
+    </>
   )
 }

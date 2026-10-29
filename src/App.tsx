@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import GridBackground from './components/GridBackground'
 import TopTabs, { type Tab } from './components/TopTabs'
 import { listStickers, type Sticker } from './lib/stickers'
 import { supabase } from './lib/supabase'
@@ -26,13 +27,20 @@ export default function App() {
 
   if (!started) return <Splash onStart={() => setStarted(true)} />
 
+  // 지하철 꾸미기는 가로 화면이라 탭 없이 전체를 쓴다
+  if (tab === 'deco') return <SubwayDecoScreen stickers={stickers} onChange={refresh} onBack={() => setTab('canvas')} />
+
   return (
-    <div className="flex h-full flex-col pt-[env(safe-area-inset-top)]">
-      <TopTabs tab={tab} onChange={setTab} />
-      {!supabase && (
-        <p className="pb-2 text-center text-[10px] text-muted">DB 미연결 · 메모리에만 저장 (.env.local 확인)</p>
+    <div className="relative h-full overflow-hidden">
+      <GridBackground />
+      <div className="absolute inset-x-0 top-[calc(env(safe-area-inset-top)+18px)] z-10">
+        <TopTabs tab={tab} onChange={setTab} />
+      </div>
+      {(!supabase || error) && (
+        <p className="absolute inset-x-0 top-[calc(env(safe-area-inset-top)+2px)] z-10 text-center text-[10px] font-medium text-muted">
+          {error ? `DB 오류: ${error}` : 'DB 미연결 · 메모리에만 저장 (.env.local 확인)'}
+        </p>
       )}
-      {error && <p className="pb-2 text-center text-[10px] text-red-700">DB 오류: {error}</p>}
       {tab === 'canvas' && (
         <CanvasScreen
           onSaved={() => {
@@ -42,7 +50,6 @@ export default function App() {
         />
       )}
       {tab === 'book' && <StickerBookScreen stickers={stickers} onChange={refresh} />}
-      {tab === 'deco' && <SubwayDecoScreen stickers={stickers} onChange={refresh} />}
     </div>
   )
 }
