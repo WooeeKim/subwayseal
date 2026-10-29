@@ -58,9 +58,9 @@ export default function SubwayDecoScreen({
   }
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-paper">
+    <div className="fixed inset-0 overflow-clip bg-paper">
       <div
-        className="absolute top-0 left-0 origin-top-left overflow-hidden"
+        className="absolute top-0 left-0 origin-top-left overflow-clip"
         style={{ width: long, height: short, transform: portrait ? `translateX(${vw}px) rotate(90deg)` : undefined }}
       >
         <div className="relative origin-top-left" style={{ width: innerWidth, height: H, transform: `scale(${scale})` }}>
