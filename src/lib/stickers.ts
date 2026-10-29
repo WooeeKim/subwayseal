@@ -7,6 +7,7 @@ export type Sticker = {
   memo: string
   imageUrl: string
   createdAt: string
+  bookLabel: number | null
   bookPage: number | null
   bookSlot: number | null
   decoX: number | null
@@ -20,6 +21,7 @@ type Row = {
   memo: string
   image_path: string
   created_at: string
+  book_label: number | null
   book_page: number | null
   book_slot: number | null
   deco_x: number | null
@@ -40,6 +42,7 @@ function fromRow(row: Row): Sticker {
     memo: row.memo,
     imageUrl: data.publicUrl,
     createdAt: row.created_at,
+    bookLabel: row.book_label ?? null,
     bookPage: row.book_page,
     bookSlot: row.book_slot,
     decoX: row.deco_x,
@@ -68,6 +71,7 @@ export async function createSticker(input: NewSticker): Promise<Sticker> {
       memo: input.memo,
       imageUrl: URL.createObjectURL(input.image),
       createdAt: new Date().toISOString(),
+      bookLabel: null,
       bookPage: null,
       bookSlot: null,
       decoX: null,
@@ -92,7 +96,7 @@ export async function createSticker(input: NewSticker): Promise<Sticker> {
   return fromRow(data as Row)
 }
 
-export type StickerPatch = Partial<Pick<Sticker, 'bookPage' | 'bookSlot' | 'decoX' | 'decoY'>>
+export type StickerPatch = Partial<Pick<Sticker, 'bookLabel' | 'bookPage' | 'bookSlot' | 'decoX' | 'decoY'>>
 
 export async function updateSticker(id: string, patch: StickerPatch): Promise<void> {
   if (!supabase) {
@@ -100,6 +104,7 @@ export async function updateSticker(id: string, patch: StickerPatch): Promise<vo
     return
   }
   const row: Partial<Row> = {}
+  if ('bookLabel' in patch) row.book_label = patch.bookLabel
   if ('bookPage' in patch) row.book_page = patch.bookPage
   if ('bookSlot' in patch) row.book_slot = patch.bookSlot
   if ('decoX' in patch) row.deco_x = patch.decoX

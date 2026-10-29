@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import GridBackground from './components/GridBackground'
 import TopTabs, { type Tab } from './components/TopTabs'
+import { DEFAULT_LABEL } from './lib/labels'
 import { listStickers, type Sticker } from './lib/stickers'
 import { supabase } from './lib/supabase'
 import CanvasScreen from './screens/CanvasScreen'
@@ -13,6 +14,8 @@ export default function App() {
   const [tab, setTab] = useState<Tab>('canvas')
   const [stickers, setStickers] = useState<Sticker[]>([])
   const [error, setError] = useState('')
+  // 지금 보고 있는 스티커북(라벨). 스티커북과 지하철 꾸미기가 같이 쓴다.
+  const [label, setLabel] = useState(DEFAULT_LABEL)
 
   const refresh = useCallback(() => {
     listStickers()
@@ -28,7 +31,15 @@ export default function App() {
   if (!started) return <Splash onStart={() => setStarted(true)} />
 
   // 지하철 꾸미기는 가로 화면이라 탭 없이 전체를 쓴다
-  if (tab === 'deco') return <SubwayDecoScreen stickers={stickers} onChange={refresh} onBack={() => setTab('canvas')} />
+  if (tab === 'deco') return (
+      <SubwayDecoScreen
+        stickers={stickers}
+        label={label}
+        onLabel={setLabel}
+        onChange={refresh}
+        onBack={() => setTab('canvas')}
+      />
+    )
 
   return (
     <div className="relative h-full overflow-hidden">
@@ -49,7 +60,9 @@ export default function App() {
           }}
         />
       )}
-      {tab === 'book' && <StickerBookScreen stickers={stickers} onChange={refresh} />}
+      {tab === 'book' && (
+        <StickerBookScreen stickers={stickers} label={label} onLabel={setLabel} onChange={refresh} />
+      )}
     </div>
   )
 }

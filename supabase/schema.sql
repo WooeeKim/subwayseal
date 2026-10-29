@@ -8,7 +8,8 @@ create table if not exists public.stickers (
   memo text not null default '',
   image_path text not null,
   created_at timestamptz not null default now(),
-  -- 스티커북에 붙인 위치 (null 이면 아직 안 붙임)
+  -- 스티커북에 붙인 위치 (null 이면 아직 안 붙임). book_label = 라벨(책) 1~6
+  book_label int,
   book_page int,
   book_slot int,
   -- 지하철 꾸미기 위치 (0~1 비율, null 이면 안 붙임)
